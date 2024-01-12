@@ -47,6 +47,9 @@ module.exports = {
           typescript: {},
         },
       },
+      rules: {
+        "react/no-unknown-property": "off",
+      },
     },
 
     // Typescript
