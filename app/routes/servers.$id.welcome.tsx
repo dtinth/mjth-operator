@@ -1,9 +1,11 @@
 import { ActionFunctionArgs, LoaderFunctionArgs } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
-import { renderToStaticMarkup } from "react-dom/server";
 import { ensureLoggedIn } from "~/utils/ensureLoggedIn";
 import { getServerInfo, rpc } from "~/utils/jamulus";
-import { WelcomeMessage } from "~/utils/welcomeMessage";
+import {
+  generateWelcomeMessage,
+  syncWelcomeMessage,
+} from "~/utils/welcomeMessage";
 
 export async function loader(args: LoaderFunctionArgs) {
   await ensureLoggedIn(args);
@@ -26,28 +28,9 @@ export async function loader(args: LoaderFunctionArgs) {
 export async function action(args: ActionFunctionArgs) {
   await ensureLoggedIn(args);
   const id = args.params.id!;
-  const info = await getServerInfo(id);
-  const result = await rpc(info, "jamulusserver/setWelcomeMessage", {
-    welcomeMessage: generateWelcomeMessage(id, info),
-  });
+  const result = await syncWelcomeMessage(id);
   console.log(result);
   return null;
-}
-
-function generateWelcomeMessage(
-  id: string,
-  info: Awaited<ReturnType<typeof getServerInfo>>
-) {
-  function getDefaultServerName(id: string): string {
-    return `MJTH [${id}]`;
-  }
-
-  return renderToStaticMarkup(
-    <WelcomeMessage
-      serverName={info.settings?.serverName || getDefaultServerName(id)}
-      listenUrl={info.settings?.listenUrl}
-    />
-  );
 }
 
 export default function ServerWelcomeMessage() {
