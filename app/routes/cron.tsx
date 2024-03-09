@@ -11,8 +11,11 @@ export async function action(args: ActionFunctionArgs) {
   const result = await Promise.all(
     serverList.map(async (info) => {
       try {
-        return { id: info.id, result: await syncWelcomeMessage(info.id) };
+        const serverResult = await syncWelcomeMessage(info.id);
+        console.log("[cron]", info.id, serverResult);
+        return { id: info.id, result: serverResult };
       } catch (e) {
+        console.error("[cron]", info.id, e);
         return { id: info.id, error: String(e) };
       }
     })
